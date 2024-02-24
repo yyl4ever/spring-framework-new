@@ -302,6 +302,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.resourceFactory = beanFactory;
 		}
 		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			// 表达式解析器
 			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
 		}
 	}

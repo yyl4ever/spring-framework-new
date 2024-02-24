@@ -352,6 +352,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					if (!StringUtils.hasLength(scopeName)) {
 						throw new IllegalStateException("No scope name defined for bean '" + beanName + "'");
 					}
+					// 非单例、多例，用户自定义作用域
 					Scope scope = this.scopes.get(scopeName);
 					if (scope == null) {
 						throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
@@ -912,6 +913,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	@Override
 	@Nullable
 	public String resolveEmbeddedValue(@Nullable String value) {
+		// 表达式
 		if (value == null) {
 			return null;
 		}
@@ -922,6 +924,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				return null;
 			}
 		}
+		// 被解析后的值
 		return result;
 	}
 
@@ -1394,6 +1397,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					mbd.overrideFrom(bd);
 				}
 
+				// 设置为单例
 				// Set default singleton scope, if not configured before.
 				if (!StringUtils.hasLength(mbd.getScope())) {
 					mbd.setScope(SCOPE_SINGLETON);

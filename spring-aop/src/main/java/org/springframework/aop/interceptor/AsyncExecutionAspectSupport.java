@@ -157,6 +157,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (beanFactory instanceof ConfigurableBeanFactory configurableBeanFactory) {
+			// 解析表达式
 			this.embeddedValueResolver = new EmbeddedValueResolver(configurableBeanFactory);
 		}
 		this.executors.clear();
@@ -172,6 +173,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 		AsyncTaskExecutor executor = this.executors.get(method);
 		if (executor == null) {
 			Executor targetExecutor;
+			// 方法上的表达式
 			String qualifier = getExecutorQualifier(method);
 			if (this.embeddedValueResolver != null && StringUtils.hasLength(qualifier)) {
 				qualifier = this.embeddedValueResolver.resolveStringValue(qualifier);
