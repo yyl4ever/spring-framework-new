@@ -802,24 +802,36 @@ public abstract class BeanUtils {
 			}
 			actualEditable = editable;
 		}
+		// 获取目标对象的所有属性信息
 		PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
+		// 是否有需要忽略的属性
 		Set<String> ignoredProps = (ignoreProperties != null ? new HashSet<>(Arrays.asList(ignoreProperties)) : null);
 		CachedIntrospectionResults sourceResults = (actualEditable != source.getClass() ?
 				CachedIntrospectionResults.forClass(source.getClass()) : null);
 
+		// 开始遍历各个属性
 		for (PropertyDescriptor targetPd : targetPds) {
+			// 获取目标对象该属性的 set 方法
 			Method writeMethod = targetPd.getWriteMethod();
+			// 如果没有 set 方法或者该属性不需要被拷贝，则继续循环目标对象的下一个属性
 			if (writeMethod != null && (ignoredProps == null || !ignoredProps.contains(targetPd.getName()))) {
+				// 根据目标对象的属性，获取源对象的相同属性
 				PropertyDescriptor sourcePd = (sourceResults != null ?
 						sourceResults.getPropertyDescriptor(targetPd.getName()) : targetPd);
 				if (sourcePd != null) {
+					// 获取源对象该属性的 get 方法
 					Method readMethod = sourcePd.getReadMethod();
+					// get 方法不为空，且目标对象该属性的 set 方法的入参与源对象 get 方法的返回值一致
 					if (readMethod != null) {
 						if (isAssignable(writeMethod, readMethod, sourcePd, targetPd)) {
 							try {
+								// 若源对象的 get 不是 public，则设置为反射可调用
 								ReflectionUtils.makeAccessible(readMethod);
+								// 通过反射获取源对象该属性的返回值
 								Object value = readMethod.invoke(source);
+								// 若目标对象的 set 不是 public，则设置为反射可调用
 								ReflectionUtils.makeAccessible(writeMethod);
+								// 通过反射将源对象该属性的返回值写入到目标对象的对应属性中
 								writeMethod.invoke(target, value);
 							}
 							catch (Throwable ex) {
@@ -833,19 +845,33 @@ public abstract class BeanUtils {
 		}
 	}
 
+	/**
+	 *
+	 * @param writeMethod 目标属性的setter方法
+	 * @param readMethod 源属性的getter方法
+	 * @param sourcePd 源属性的描述符
+	 * @param targetPd 目标属性的描述符
+	 * @return
+	 */
 	private static boolean isAssignable(Method writeMethod, Method readMethod,
 			PropertyDescriptor sourcePd, PropertyDescriptor targetPd) {
-
+		// 获取目标setter方法的参数类型（即目标属性的类型）并存储在paramType中
 		Type paramType = writeMethod.getGenericParameterTypes()[0];
+		// 类型捕捉：判断 clazz 所代表的类能否接受 readMethod 返回类型的对象赋值，比如 ClassUtils.isAssignable(Animial.class, 子类 Dog 类型)
 		if (paramType instanceof Class<?> clazz) {
+			// 判断paramType是否是Class类型，如果是，则调用ClassUtils.isAssignable判断源属性的返回类型（即getter方法的返回类型）是否可以被目标属性类型赋值
 			return ClassUtils.isAssignable(clazz, readMethod.getReturnType());
 		}
 		else if (paramType.equals(readMethod.getGenericReturnType())) {
+			// 若paramType不是Class类型，直接比较其与源属性getter方法的返回类型的泛型信息是否相等，如果相等则可赋值，返回true
 			return true;
 		}
 		else {
+			// 上述两种情况都不满足时，将源属性和目标属性的ResolvableType分别提取出来
 			ResolvableType sourceType = ((GenericTypeAwarePropertyDescriptor) sourcePd).getReadMethodType();
 			ResolvableType targetType = ((GenericTypeAwarePropertyDescriptor) targetPd).getWriteMethodType();
+			// 如果sourceType或targetType存在无法解析的泛型，为了避免错误，此时退化为使用ClassUtils.isAssignable来检查非泛型的类层级的赋值关系
+			// 否则，使用targetType.isAssignableFrom(sourceType)来判断目标类型是否可以接收源类型，包括考虑泛型兼容性
 			// Ignore generic types in assignable check if either ResolvableType has unresolvable generics.
 			return (sourceType.hasUnresolvableGenerics() || targetType.hasUnresolvableGenerics() ?
 					ClassUtils.isAssignable(writeMethod.getParameterTypes()[0], readMethod.getReturnType()) :
