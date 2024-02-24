@@ -160,13 +160,16 @@ public class RollbackRuleAttribute implements Serializable{
 
 
 	private int getDepth(Class<?> exceptionType, int depth) {
+		// this.exceptionType:用户配置的规则; exceptionType: 当前抛出的异常
 		if (this.exceptionType != null) {
+			// 异常模式是类用 equals 匹配
 			if (this.exceptionType.equals(exceptionType)) {
 				// Found it!
 				return depth;
 			}
 		}
 		else if (exceptionType.getName().contains(this.exceptionPattern)) {
+			// 异常模式是字符串用 contains 匹配
 			// Found it!
 			return depth;
 		}

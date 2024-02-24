@@ -125,6 +125,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 		RollbackRuleAttribute winner = null;
 		int deepest = Integer.MAX_VALUE;
 
+		// this.rollbackRules: @Transactional 注解上 rollbackFor 属性中的对象的全路径名称
 		if (this.rollbackRules != null) {
 			for (RollbackRuleAttribute rule : this.rollbackRules) {
 				int depth = rule.getDepth(ex);
@@ -137,6 +138,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 
 		// User superclass behavior (rollback on unchecked) if no rule matches.
 		if (winner == null) {
+			// 事务默认回滚条件
 			return super.rollbackOn(ex);
 		}
 

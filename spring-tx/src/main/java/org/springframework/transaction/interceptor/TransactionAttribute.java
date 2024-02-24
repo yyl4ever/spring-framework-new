@@ -53,6 +53,7 @@ public interface TransactionAttribute extends TransactionDefinition {
 	Collection<String> getLabels();
 
 	/**
+	 * 判断 ex 参数是否匹配指定的回滚异常
 	 * Should we roll back on the given exception?
 	 * @param ex the exception to evaluate
 	 * @return whether to perform a rollback or not
