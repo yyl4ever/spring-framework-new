@@ -418,6 +418,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 	@Nullable
 	private Object execute(CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
+		// 判断是不是 sync=true 的方法
 		if (contexts.isSynchronized()) {
 			// Special handling of synchronized invocation
 			return executeSynchronized(invoker, method, contexts);
@@ -451,6 +452,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			try {
+				// 具体的缓存实现 get 方法
 				return wrapCacheValue(method, cache.get(key, () -> unwrapReturnValue(invokeOperation(invoker))));
 			}
 			catch (Cache.ValueRetrievalException ex) {

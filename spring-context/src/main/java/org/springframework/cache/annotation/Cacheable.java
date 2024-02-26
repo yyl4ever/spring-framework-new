@@ -178,6 +178,7 @@ public @interface Cacheable {
 	String unless() default "";
 
 	/**
+	 * 多线程获取缓存值时的同步机制
 	 * Synchronize the invocation of the underlying method if several threads are
 	 * attempting to load a value for the same key. The synchronization leads to
 	 * a couple of limitations:
